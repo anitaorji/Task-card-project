@@ -1,16 +1,27 @@
-# React + Vite
+# TaskCard App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple React TaskCard component that displays task details including title, description, priority, due date, time remaining, status, tags, and actions (edit/delete). Built with React and plain CSS.
 
-Currently, two official plugins are available:
+1.How to Run Locally
+- Clone the repository
+  git clone https://github.com/YOUR_USERNAME/taskcard-app.git
+- cd taskcard-app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+2. Technical Decisions
+- Plain CSS over UI frameworks
+I used vanilla CSS instead of Tailwind or libraries to keep styling explicit and readable, reduce dependency overhead and make the component easier to review and test.
+- React Hooks for state management
+useState → handles completion state and time remaining
+useEffect → updates time remaining at regular intervals.
+- Utility functions outside component
+Helper functions like: formatDate and getTimeRemaining were placed outside the component to:
+avoid re-creation on every render, improve readability and keep logic reusable and clean
 
-## React Compiler
+3.Trade-offs
+- Interval updates (60 seconds)
+Instead of real-time second-by-second updates:
+improves performance
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Static due date
+The due date is currently hardcoded for simplicity:
+easier testing and demo
