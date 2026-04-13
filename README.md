@@ -6,6 +6,9 @@ A simple React TaskCard component that displays task details including title, de
 - Clone the repository
   git clone https://github.com/YOUR_USERNAME/taskcard-app.git
 - cd taskcard-app
+- npm install
+- npm run dev
+- Open in browser
 
 2. Technical Decisions
 - Plain CSS over UI frameworks
