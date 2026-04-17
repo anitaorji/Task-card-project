@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   justify-self: center;
+  overflow: hidden;
 }
 
 [data-testid="test-todo-title"] {
@@ -22,6 +23,20 @@
   font-size: 0.9rem;
   color: #4b5563;
   margin-top: 0.5rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.collapsed-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.expanded-description {
+  display: block;
 }
 
 [data-testid="test-todo-priority"] {
@@ -74,7 +89,28 @@
 }
 
 [data-testid="test-todo-complete-toggle"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #9ca3af;
+  border-radius: 4px;
   cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+[data-testid="test-todo-complete-toggle"]:checked {
+  background-color: #10b981;
+  border-color: #10b981;
+}
+
+[data-testid="test-todo-complete-toggle"]:checked::after {
+  content: "✔";
+  color: white;
+  font-size: 12px;
+  position: absolute;
+  top: -1px;
+  left: 3px;
 }
 
 [data-testid="test-todo-tags"] {
@@ -128,8 +164,158 @@ button[data-testid="test-todo-delete-button"]:hover {
 
 button:focus,
 input:focus {
+  outline: none;
+}
+
+button:focus-visible,
+input:focus-visible {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
+}
+
+[data-testid="test-todo-priority-indicator"] {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  border-left: 4px solid transparent;
+}
+
+.priority-low {
+  background-color: #d1fae5;
+  color: #065f46;
+  border-left-color: #10b981;
+}
+
+.priority-medium {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-left-color: #f59e0b;
+}
+
+.priority-high {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-left-color: #ef4444;
+}
+
+[data-testid="test-todo-card"].done {
+  opacity: 0.7;
+}
+
+[data-testid="test-todo-card"].done 
+[data-testid="test-todo-title"] {
+  text-decoration: line-through;
+}
+
+[data-testid="test-todo-card"].in-progress {
+  border-left: 4px solid #3b82f6;
+}
+
+[data-testid="test-todo-card"].pending {
+  border-left: 4px solid #9ca3af;
+}
+
+[data-testid="test-todo-overdue-indicator"] {
+  margin-top: 0.5rem;
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b91c1c;
+  background-color: #fee2e2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+[data-testid="test-todo-expand-toggle"] {
+  margin-top: 0.5rem;
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+[data-testid="test-todo-expand-toggle"]:hover {
+  text-decoration: underline;
+}
+
+[data-testid="test-todo-collapsible-section"] {
+  transition: all 0.3s ease;
+}
+
+[data-testid="test-todo-status-control"] {
+  margin-top: 0.75rem;
+  padding: 0.35rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 0.8rem;
+}
+
+[data-testid="test-todo-edit-form"] {
+  max-width: 480px;
+  width: 100%;
+  margin-top: 5em;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+[data-testid="test-todo-edit-form"] label {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+[data-testid="test-todo-edit-form"] input,
+[data-testid="test-todo-edit-form"] textarea,
+[data-testid="test-todo-edit-form"] select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+[data-testid="test-todo-edit-form"] textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+button[data-testid="test-todo-save-button"] {
+  background-color: #10b981;
+  color: white;
+}
+
+button[data-testid="test-todo-save-button"]:hover {
+  background-color: #065f46;
+}
+
+button[data-testid="test-todo-cancel-button"] {
+  background-color: #e5e7eb;
+}
+
+button[data-testid="test-todo-cancel-button"]:hover {
+  background-color: #9ca3af;
+}
+
+@media (min-width: 768px) {
+  [data-testid="test-todo-status-control"],
+  [data-testid="test-todo-priority-indicator"] {
+    align-self: flex-start;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 @media (min-width: 640px) {

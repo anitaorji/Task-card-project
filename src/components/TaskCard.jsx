@@ -9,115 +9,251 @@ function formatDate(date) {
   });
 }
 
-function getTimeRemaining(dueDate) {
-  const now = new Date();
-  const diff = dueDate - now;
+const formatTime = (ms) => {
+  const minutes = Math.floor(ms / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
 
-  const minute = 1000 * 60;
-  const hour = minute * 60;
-  const day = hour * 24;
-
-  if (diff <= 0) {
-    const absDiff = Math.abs(diff);
-
-    const hours = Math.floor(absDiff / hour);
-    const minutes = Math.floor((absDiff % hour) / minute);
-
-    if (hours === 0 && minutes === 0) return "Due now!";
-    if (hours === 0)
-      return `Overdue by ${minutes} minute${minutes > 1 ? "s" : ""}`;
-
-    return `Overdue by ${hours} hour${hours > 1 ? "s" : ""}`;
-  }
-
-  const days = Math.ceil(diff / day);
-
-  if (days === 0) return "Due today";
-  if (days === 1) return "Due tomorrow";
-
-  return `Due in ${days} day${days > 1 ? "s" : ""}`;
-}
+  if (days > 0) return `${days} day(s)`;
+  if (hours > 0) return `${hours} hour(s)`;
+  return `${minutes} minute(s)`;
+};
 
 function TaskCard() {
-  const [completed, setCompleted] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState("");
+  const [todo, setTodo] = useState({
+    title: "Design new homepage",
+    description: "The homepage takes a new design.",
+    status: "Pending",
+    priority: "Low",
+    dueDate: "2026-05-01T18:00:00Z",
+  });
 
-  const dueDate = new Date("2026-05-01T18:00:00Z");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [editForm, setEditForm] = useState(todo);
+  const [timeLabel, setTimeLabel] = useState("");
+
+  const dueDate = new Date(todo.dueDate);
 
   useEffect(() => {
+    if (todo.status === "Done") {
+      setTimeLabel("Completed");
+      return;
+    }
+
     const update = () => {
-      setTimeRemaining(getTimeRemaining(dueDate));
+      const now = new Date();
+      const diff = dueDate - now;
+
+      if (diff < 0) {
+        setTimeLabel(`Overdue by ${formatTime(Math.abs(diff))}`);
+      } else {
+        setTimeLabel(`Due in ${formatTime(diff)}`);
+      }
     };
 
     update();
-    const interval = setInterval(update, 60000);
+    const interval = setInterval(update, 30000);
 
     return () => clearInterval(interval);
-  }, [dueDate]);
-return (
-  <article data-testid="test-todo-card">
-    <h3 data-testid="test-todo-title">Design new homepage</h3>
-    <p data-testid="test-todo-description">The homepage takes a new design.</p>
-    <span
-        data-testid="test-todo-priority"
-        className="priority-low"
-        aria-label="Low priority">
-        Low
+  }, [todo.dueDate, todo.status]);
+
+  const handleCheckbox = (checked) => {
+    setTodo((prev) => ({
+      ...prev,
+      status: checked ? "Done" : "Pending",
+    }));
+  };
+
+  const handleStatusChange = (value) => {
+    setTodo((prev) => ({
+      ...prev,
+      status: value,
+    }));
+  };
+
+  const handleEdit = () => {
+    setEditForm(todo);
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    setTodo(editForm);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditForm(todo);
+    setIsEditing(false);
+  };
+
+  const isLongText = todo.description.length > 100;
+  const displayText =
+    isExpanded || !isLongText
+      ? todo.description
+      : todo.description.slice(0, 100) + "...";
+
+  const isOverdue =
+    todo.status !== "Done" && new Date(todo.dueDate) < new Date();
+
+  if (isEditing) {
+    return (
+      <form data-testid="test-todo-edit-form">
+        <label htmlFor="title">Title</label>
+        <input
+          id="title"
+          data-testid="test-todo-edit-title-input"
+          value={editForm.title}
+          onChange={(e) =>
+            setEditForm({ ...editForm, title: e.target.value })
+          }
+        />
+
+        <label htmlFor="desc">Description</label>
+        <textarea
+          id="desc"
+          data-testid="test-todo-edit-description-input"
+          value={editForm.description}
+          onChange={(e) =>
+            setEditForm({ ...editForm, description: e.target.value })
+          }
+        />
+        <p
+        data-testid="test-todo-description"
+        className={isExpanded ? "expanded-description" : "collapsed-description"}>
+          {todo.description}
+          </p>
+
+        <label htmlFor="priority">Priority</label>
+        <select
+          id="priority"
+          data-testid="test-todo-edit-priority-select"
+          value={editForm.priority}
+          onChange={(e) =>
+            setEditForm({ ...editForm, priority: e.target.value })
+          }
+        >
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+
+        <label htmlFor="date">Due Date</label>
+        <input
+          type="datetime-local"
+          id="date"
+          data-testid="test-todo-edit-due-date-input"
+          value={editForm.dueDate}
+          onChange={(e) =>
+            setEditForm({ ...editForm, dueDate: e.target.value })
+          }
+        />
+
+        <button
+          type="button"
+          data-testid="test-todo-save-button"
+          onClick={handleSave}
+        >
+          Save
+        </button>
+
+        <button
+          type="button"
+          data-testid="test-todo-cancel-button"
+          onClick={handleCancel}
+        >
+          Cancel
+        </button>
+      </form>
+    );
+  }
+  return (
+    <article data-testid="test-todo-card">
+      <h3
+        data-testid="test-todo-title"
+        style={{
+          textDecoration: todo.status === "Done" ? "line-through" : "none",
+        }}
+      >
+        {todo.title}
+      </h3>
+
+      <span
+        data-testid="test-todo-priority-indicator"
+        className={`priority-${todo.priority.toLowerCase()}`}
+      >
+        {todo.priority}
       </span>
-    <time
+
+      <p data-testid="test-todo-description">{displayText}</p>
+
+      {isLongText && (
+        <button
+          data-testid="test-todo-expand-toggle"
+          aria-expanded={isExpanded}
+          aria-controls="todo-desc"
+          onClick={() => setIsExpanded((prev) => !prev)}
+        >
+          {isExpanded ? "Collapse" : "Expand"}
+        </button>
+      )}
+
+      <div
+        id="todo-desc"
+        data-testid="test-todo-collapsible-section"
+      />
+
+      <time
         data-testid="test-todo-due-date"
-        dateTime={dueDate.toISOString()}>
+        dateTime={dueDate.toISOString()}
+      >
         Due {formatDate(dueDate)}
       </time>
 
       <div
         data-testid="test-todo-time-remaining"
-        aria-live="polite">
-        {timeRemaining}
+        aria-live="polite"
+      >
+        {timeLabel}
       </div>
 
-    <span data-testid="test-todo-status">
-        {completed ? "Done" : "Pending"}
-      </span>
-    <div className="todo-toggle">
-        <input
-          id="complete-toggle"
-          type="checkbox"
-          data-testid="test-todo-complete-toggle"
-          checked={completed}
-          onChange={() => setCompleted(!completed)}/>
-        <label htmlFor="complete-toggle">
-          Mark
-        </label>
-      </div>
+      {isOverdue && (
+        <span data-testid="test-todo-overdue-indicator">
+          Overdue
+        </span>
+      )}
 
-  <ul
-    data-testid="test-todo-tags"
-    role="list"
-    className="tags">
-    <li data-testid="test-todo-tag-work" className="tag">Work</li>
-    <li data-testid="test-todo-tag-urgent" className="tag">Urgent</li>
-    <li data-testid="test-todo-tag-design" className="tag">Design</li>
-  </ul>
+      <select
+        data-testid="test-todo-status-control"
+        value={todo.status}
+        onChange={(e) => handleStatusChange(e.target.value)}
+      >
+        <option>Pending</option>
+        <option>In Progress</option>
+        <option>Done</option>
+      </select>
 
-  <div className="actions">
-    <button
-      data-testid="test-todo-edit-button"
-      aria-label="Edit task"
-      onClick={() => alert("edit clicked")}
-      className="btn btn-edit">
-      Edit
-    </button>
+       <span data-testid="test-todo-status">{todo.status}</span> 
 
-    <button
-      data-testid="test-todo-delete-button"
-      aria-label="Delete task"
-      onClick={() => alert("Delete clicked")}
-      className="btn btn-delete">
-      Delete
-    </button>
-  </div>
-</article>
-)
-};
+      <input
+        type="checkbox"
+        data-testid="test-todo-complete-toggle"
+        checked={todo.status === "Done"}
+        onChange={(e) => handleCheckbox(e.target.checked)}
+      />
+
+      <button
+        data-testid="test-todo-edit-button"
+        onClick={handleEdit}
+      >
+        Edit
+      </button>
+
+      <button data-testid="test-todo-delete-button">
+        Delete
+      </button>
+    </article>
+  );
+}
+
 export default TaskCard;
